@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('stock');
             $table->unsignedBigInteger('categoria_producto_id');
             $table->boolean('promocion')->default(false);
-            $table->foreign('categoria_id')->references('id')->on('categoria_producto');
+            $table->foreign('categoria_producto_id')->references('id')->on('categoria_producto');
             $table->foreign('medida_id')->references('id')->on('medida');
             $table->softDeletes();
             $table->timestamps();
