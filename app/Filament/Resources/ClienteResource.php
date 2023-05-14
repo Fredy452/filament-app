@@ -12,17 +12,29 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+// Export
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+// filters
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+
 
 class ClienteResource extends Resource
 {
     protected static ?string $model = Cliente::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    // Filtro para global filter
+    protected static ?string $recordTitleAttribute = 'nombre';
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                    SpatieMediaLibraryFileUpload::make('imagen')->collection('clientes'),
                     Forms\Components\Select::make('tipo_cliente_id')
                         ->required()->relationship('tipo_clientes', 'nombre'),
                     Forms\Components\TextInput::make('nombre')
@@ -42,7 +54,7 @@ class ClienteResource extends Resource
                         ->required()
                         ->maxLength(255),
                     Forms\Components\DatePicker::make('fecha_registro')
-                        ->required(),
+                        ->required()->default(fn () => now())->disabled(),
                     Forms\Components\TextInput::make('total_gasto')
                         ->required(),
             ]);
@@ -52,17 +64,19 @@ class ClienteResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tipo_clientes.nombre'),
-                Tables\Columns\TextColumn::make('nombre'),
+                SpatieMediaLibraryImageColumn::make('imagen')->collection('clientes'),
+                Tables\Columns\TextColumn::make('nombre')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('apellido'),
                 Tables\Columns\TextColumn::make('direccion'),
                 Tables\Columns\TextColumn::make('telefono'),
-                Tables\Columns\TextColumn::make('correo'),
+                Tables\Columns\TextColumn::make('correo')->searchable(),
                 Tables\Columns\TextColumn::make('fecha_registro')
                     ->date(),
+                Tables\Columns\TextColumn::make('tipo_clientes.nombre')->label('Tipo'),
                 Tables\Columns\TextColumn::make('total_gasto'),
             ])
             ->filters([
+                SelectFilter::make('Tipo')->relationship('tipo_clientes', 'nombre'),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -73,6 +87,7 @@ class ClienteResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
+                FilamentExportBulkAction::make('export'),
             ]);
     }
 

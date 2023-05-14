@@ -11,7 +11,7 @@ class Venta extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'ventas';
-    protected $fillable = ['numero_factura', 'user_id', 'metodo_pago_id', 'estado_pago_id','fecha ', 'total_venta'];
+    protected $fillable = ['numero_factura', 'users_id', 'clientes_id', 'metodo_pagos_id', 'estado_pagos_id','fecha', 'total_venta'];
 
     public function users()
     {

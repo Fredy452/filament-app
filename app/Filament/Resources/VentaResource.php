@@ -12,32 +12,40 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+// filters
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+// Export
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 
 class VentaResource extends Resource
 {
     protected static ?string $model = Venta::class;
+    // blobal searchable
+    protected static ?string $recordTitleAttribute = 'numero_factura';
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-lightning-bolt';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('name')
-                    ->required()->relationship('users', 'name')->default(fn () =>
-                    auth()->user()->id)->hidden(),
-                Forms\Components\Select::make('cliente_id')
-                    ->required()->relationship('clientes', 'nombre'),
-                Forms\Components\Select::make('metodo_pago_id')
-                    ->required()->relationship('metodo_pagos', 'nombre')->default(1),
-                Forms\Components\Select::make('estado_pago_id')
-                    ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1),
-                Forms\Components\DateTimePicker::make('fecha')
-                    ->required()->default(fn () => now()),
-                Forms\Components\TextInput::make('numero_factura')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('total_venta'),
+                        Forms\Components\Select::make('clientes_id')
+                            ->required()->relationship('clientes', 'nombre'),
+                        Forms\Components\Select::make('metodo_pagos_id')
+                            ->required()->relationship('metodo_pagos', 'nombre')->default(1),
+                        Forms\Components\Select::make('users_id')
+                        ->required()->relationship('users', 'name')->default(fn () =>
+                        auth()->user()->id)->hidden(),
+                        Forms\Components\Select::make('estado_pagos_id')
+                            ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1),
+                        Forms\Components\DateTimePicker::make('fecha')
+                            ->required()->default(fn () => now())->disabled(),
+                        Forms\Components\TextInput::make('numero_factura')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(),
+                        Forms\Components\TextInput::make('total_venta'),
             ]);
     }
 
@@ -45,30 +53,26 @@ class VentaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('users.name'),
-                Tables\Columns\TextColumn::make('metodo_pago_id'),
-                Tables\Columns\TextColumn::make('estado_pago_id'),
+                Tables\Columns\TextColumn::make('users.name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('metodo_pagos.nombre'),
+                Tables\Columns\TextColumn::make('estado_pagos.nombre'),
                 Tables\Columns\TextColumn::make('fecha')
                     ->dateTime(),
-                Tables\Columns\TextColumn::make('numero_factura'),
-                Tables\Columns\TextColumn::make('cliente_id'),
-                Tables\Columns\TextColumn::make('categoria_producto_id'),
+                Tables\Columns\TextColumn::make('numero_factura')->searchable(),
+                Tables\Columns\TextColumn::make('clientes.nombre'),
                 Tables\Columns\TextColumn::make('total_venta'),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime(),
             ])
             ->filters([
+                SelectFilter::make('Estado')->relationship('estado_pagos', 'nombre'),//filtrar por tipo
+                SelectFilter::make('Metodo de pago')->relationship('metodo_pagos', 'nombre'),//filtrar por metodo pago
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
+                FilamentExportBulkAction::make('export'),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),

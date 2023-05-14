@@ -13,12 +13,25 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+// Export
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+// filters
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+
+
 
 class ProductoResource extends Resource
 {
     protected static ?string $model = Producto::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+     // Filtro para global filter
+     protected static ?string $recordTitleAttribute = 'nombre';
+
+
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Form $form): Form
     {
@@ -32,6 +45,7 @@ class ProductoResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('precio')
                     ->required(),
+                SpatieMediaLibraryFileUpload::make('imagen')->collection('productos'),
                 Forms\Components\Select::make('medida_id')
                         ->required()->relationship('medida', 'nombre'),
                 Forms\Components\TextInput::make('stock')
@@ -47,16 +61,22 @@ class ProductoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nombre'),
+                SpatieMediaLibraryImageColumn::make('imagen')->collection('productos'),
+                Tables\Columns\TextColumn::make('nombre')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('descripción'),
                 Tables\Columns\TextColumn::make('precio'),
                 Tables\Columns\TextColumn::make('stock'),
                 Tables\Columns\TextColumn::make('medida.nombre'),
-                Tables\Columns\TextColumn::make('categoria_producto.nombre'),
+                Tables\Columns\TextColumn::make('categoria_producto.nombre')->label('Categoria'),
                 Tables\Columns\IconColumn::make('promocion')
                     ->boolean(),
             ])
             ->filters([
+                // Creamos filtro para promoción
+                Filter::make('En promoción')->toggle()
+                ->query(fn (Builder $query): Builder => $query->where('promocion', true)),
+                Filter::make('Sin promoción')->toggle()
+                ->query(fn (Builder $query): Builder => $query->where('promocion', false)),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -64,6 +84,7 @@ class ProductoResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
+                FilamentExportBulkAction::make('export'),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
