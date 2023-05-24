@@ -6,6 +6,7 @@ use App\Filament\Resources\VentaResource\Pages;
 use App\Filament\Resources\VentaResource\RelationManagers;
 use App\Models\Venta;
 use App\Models\Cliente;
+use App\Models\Producto;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -25,6 +26,8 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Card;
 //BelongsToRelation
 use Filament\Forms\Components\Select;
+// Section
+use Filament\Forms\Components\Section;
 
 class VentaResource extends Resource
 {
@@ -62,17 +65,48 @@ class VentaResource extends Resource
                         Forms\Components\TextInput::make('total_venta'),
                 ])
                 ->columns(2),
-                Card::make()
+                Section::make('productos')
                     ->schema([
-                        Select::make('productos')
-                            ->multiple()
-                            ->relationship('productos', 'nombre')
-                            ->preload()
-                            ->searchable()
-                            ->multiple(),
-                    ])
-            ->columns(2)
+                        Forms\Components\Repeater::make('productos')
+                            ->relationship()
+                            ->schema([
+                                Forms\Components\Select::make('producto_id')
+                                    ->label('Producto')
+                                    ->options(Producto::query()->pluck('nombre', 'id'))
+                                    ->required()
+                                    ->reactive()
+                                    ->searchable()
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('precio', Producto::find($state)?->precio ?? 0))
+                                    ->columnSpan([
+                                        'md' => 5,
+                                    ]),
+
+                                Forms\Components\TextInput::make('cantidad')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->columnSpan([
+                                        'md' => 2,
+                                    ])
+                                    ->required(),
+
+                                Forms\Components\TextInput::make('precio')
+                                    ->label('Precio')
+                                    ->disabled()
+                                    ->numeric()
+                                    ->required()
+                                    ->columnSpan([
+                                        'md' => 3,
+                                    ]),
+                            ])
+                            ->defaultItems(1)
+                            ->disableLabel()
+                            ->columns([
+                                'md' => 10,
+                            ])
+                            ->required(),
+                            ])
             ]);
+
     }
 
     public static function table(Table $table): Table
