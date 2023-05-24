@@ -35,4 +35,17 @@ class Producto extends Model implements HasMedia
             ->nonQueued();
     }
 
+    //Un producto puede tener muchas ventas
+    public function ventas()
+    {
+        return $this->belongsToMany(Venta::class, 'venta_detalles')
+            ->withPivot('cantidad', 'precio')
+            ->withTimestamps();
+    }
+
+    // Un producto pertenece a un proveedor
+    public function proveedors(){
+        return $this->belongsTo('App\Models\Proveedor');
+    }
+
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\VentaResource\Pages;
 use App\Filament\Resources\VentaResource\RelationManagers;
 use App\Models\Venta;
+use App\Models\Cliente;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -17,6 +18,13 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 // Export
 use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+// hiden input
+use Filament\Forms\Components\Hidden;
+// FIELDSET
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Card;
+//BelongsToRelation
+use Filament\Forms\Components\Select;
 
 class VentaResource extends Resource
 {
@@ -30,22 +38,40 @@ class VentaResource extends Resource
     {
         return $form
             ->schema([
-                        Forms\Components\Select::make('clientes_id')
-                            ->required()->relationship('clientes', 'nombre'),
-                        Forms\Components\Select::make('metodo_pagos_id')
-                            ->required()->relationship('metodo_pagos', 'nombre')->default(1),
-                        Forms\Components\Select::make('users_id')
-                        ->required()->relationship('users', 'name')->default(fn () =>
-                        auth()->user()->id)->hidden(),
-                        Forms\Components\Select::make('estado_pagos_id')
-                            ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1),
-                        Forms\Components\DateTimePicker::make('fecha')
-                            ->required()->default(fn () => now())->disabled(),
+                Card::make()
+                ->schema([
+                    Forms\Components\Hidden::make('users_id')
+                    ->default(fn () => auth()->user()->id),
+                    Forms\Components\Select::make('clientes_id')
+                    ->label('Cliente')
+                        ->required()->options(Cliente::all()
+                        ->pluck('nombre', 'id'))
+                        ->preload()
+                        ->searchable(),
+                    Forms\Components\Select::make('metodo_pagos_id')
+                        ->required()->relationship('metodo_pagos', 'nombre')->default(1),
                         Forms\Components\TextInput::make('numero_factura')
                             ->required()
                             ->maxLength(255)
                             ->unique(),
+                        Forms\Components\DateTimePicker::make('fecha')
+                            ->required()->default(fn () => now())->disabled(),
+                        Forms\Components\Select::make('estado_pagos_id')
+                        ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1)
+                        ->label('Estado'),
                         Forms\Components\TextInput::make('total_venta'),
+                ])
+                ->columns(2),
+                Card::make()
+                    ->schema([
+                        Select::make('productos')
+                            ->multiple()
+                            ->relationship('productos', 'nombre')
+                            ->preload()
+                            ->searchable()
+                            ->multiple(),
+                    ])
+            ->columns(2)
             ]);
     }
 
@@ -82,7 +108,7 @@ class VentaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ProductosRelationManager::class,
         ];
     }
 

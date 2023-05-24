@@ -13,6 +13,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
+// Spatie
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 // Export
@@ -48,6 +49,9 @@ class ProductoResource extends Resource
                 SpatieMediaLibraryFileUpload::make('imagen')->collection('productos'),
                 Forms\Components\Select::make('medida_id')
                         ->required()->relationship('medida', 'nombre'),
+                Forms\Components\Select::make('proveedors_id')
+                        ->label('Proveedor')
+                        ->relationship('proveedors', 'nombre'),
                 Forms\Components\TextInput::make('stock')
                     ->required(),
                 Forms\Components\Select::make('categoria_producto_id')
@@ -68,6 +72,7 @@ class ProductoResource extends Resource
                 Tables\Columns\TextColumn::make('stock'),
                 Tables\Columns\TextColumn::make('medida.nombre'),
                 Tables\Columns\TextColumn::make('categoria_producto.nombre')->label('Categoria'),
+                Tables\Columns\TextColumn::make('proveedors.nombre')->label('Proveedor'),
                 Tables\Columns\IconColumn::make('promocion')
                     ->boolean(),
             ])

@@ -36,4 +36,12 @@ class Venta extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    // Una venta puede tener muchos productos
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'venta_detalles')
+            ->withPivot('cantidad', 'precio')
+            ->withTimestamps();
+    }
 }

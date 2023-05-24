@@ -19,4 +19,10 @@ class EditCliente extends EditRecord
             Actions\RestoreAction::make(),
         ];
     }
+
+     // Despues de editar el post redirijimos al index
+     protected function getRedirectUrl(): string
+     {
+         return $this->getResource()::getUrl('index');
+     }
 }

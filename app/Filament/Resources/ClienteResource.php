@@ -76,7 +76,7 @@ class ClienteResource extends Resource
                 Tables\Columns\TextColumn::make('total_gasto'),
             ])
             ->filters([
-                SelectFilter::make('Tipo')->relationship('tipo_clientes', 'nombre'),
+                SelectFilter::make('Tipo')->relationship('tipo_clientes', 'nombre'),//filtrar por tipo
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -87,7 +87,7 @@ class ClienteResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
-                FilamentExportBulkAction::make('export'),
+                FilamentExportBulkAction::make('export'),//exportar
             ]);
     }
 
