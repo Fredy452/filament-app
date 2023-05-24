@@ -69,6 +69,7 @@ class VentaResource extends Resource
                     ->schema([
                         Forms\Components\Repeater::make('productos')
                             ->relationship()
+                            // comentario
                             ->schema([
                                 Forms\Components\Select::make('producto_id')
                                     ->label('Producto')
