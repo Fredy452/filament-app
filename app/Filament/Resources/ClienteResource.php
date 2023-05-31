@@ -36,7 +36,7 @@ class ClienteResource extends Resource
             ->schema([
                     SpatieMediaLibraryFileUpload::make('imagen')->collection('clientes'),
                     Forms\Components\Select::make('tipo_cliente_id')
-                        ->required()->relationship('tipo_clientes', 'nombre'),
+                        ->relationship('tipo_clientes', 'nombre'),
                     Forms\Components\TextInput::make('nombre')
                         ->required()
                         ->maxLength(255),
@@ -55,8 +55,7 @@ class ClienteResource extends Resource
                         ->maxLength(255),
                     Forms\Components\DatePicker::make('fecha_registro')
                         ->required()->default(fn () => now())->disabled(),
-                    Forms\Components\TextInput::make('total_gasto')
-                        ->required(),
+                    Forms\Components\TextInput::make('total_gasto'),
             ]);
     }
 

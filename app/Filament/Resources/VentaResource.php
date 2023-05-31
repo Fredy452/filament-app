@@ -55,57 +55,17 @@ class VentaResource extends Resource
                         ->required()->relationship('metodo_pagos', 'nombre')->default(1),
                         Forms\Components\TextInput::make('numero_factura')
                             ->required()
-                            ->maxLength(255)
-                            ->unique(),
+                            ->disabled()
+                            ->default('OR-' . random_int(100000, 999999)),
                         Forms\Components\DateTimePicker::make('fecha')
                             ->required()->default(fn () => now())->disabled(),
                         Forms\Components\Select::make('estado_pagos_id')
                         ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1)
                         ->label('Estado'),
-                        Forms\Components\TextInput::make('total_venta'),
+                        Forms\Components\TextInput::make('total_venta')
+                        ->reactive(),
                 ])
                 ->columns(2),
-                Section::make('productos')
-                    ->schema([
-                        Forms\Components\Repeater::make('productos')
-                            ->relationship()
-                            // comentario
-                            ->schema([
-                                Forms\Components\Select::make('producto_id')
-                                    ->label('Producto')
-                                    ->options(Producto::query()->pluck('nombre', 'id'))
-                                    ->required()
-                                    ->reactive()
-                                    ->searchable()
-                                    ->afterStateUpdated(fn ($state, callable $set) => $set('precio', Producto::find($state)?->precio ?? 0))
-                                    ->columnSpan([
-                                        'md' => 5,
-                                    ]),
-
-                                Forms\Components\TextInput::make('cantidad')
-                                    ->numeric()
-                                    ->default(1)
-                                    ->columnSpan([
-                                        'md' => 2,
-                                    ])
-                                    ->required(),
-
-                                Forms\Components\TextInput::make('precio')
-                                    ->label('Precio')
-                                    ->disabled()
-                                    ->numeric()
-                                    ->required()
-                                    ->columnSpan([
-                                        'md' => 3,
-                                    ]),
-                            ])
-                            ->defaultItems(1)
-                            ->disableLabel()
-                            ->columns([
-                                'md' => 10,
-                            ])
-                            ->required(),
-                            ])
             ]);
 
     }
@@ -114,12 +74,8 @@ class VentaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('users.name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('metodo_pagos.nombre'),
-                Tables\Columns\TextColumn::make('estado_pagos.nombre'),
-                Tables\Columns\TextColumn::make('fecha')
-                    ->dateTime(),
-                Tables\Columns\TextColumn::make('numero_factura')->searchable(),
+                Tables\Columns\TextColumn::make('numero_factura')->label('N°')->searchable(),
+                Tables\Columns\TextColumn::make('estado_pagos.nombre')->label('Estado'),
                 Tables\Columns\TextColumn::make('clientes.nombre'),
                 Tables\Columns\TextColumn::make('total_venta'),
             ])
@@ -137,6 +93,7 @@ class VentaResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
+                Tables\Actions\DetachBulkAction::make(),
             ]);
     }
 

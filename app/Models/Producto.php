@@ -38,9 +38,7 @@ class Producto extends Model implements HasMedia
     //Un producto puede tener muchas ventas
     public function ventas()
     {
-        return $this->belongsToMany(Venta::class, 'venta_detalles')
-            ->withPivot('cantidad', 'precio')
-            ->withTimestamps();
+        return $this->belongsToMany(Venta::class, 'venta_detalles');
     }
 
     // Un producto pertenece a un proveedor

@@ -23,6 +23,22 @@ class ProductosRelationManager extends RelationManager
                 Forms\Components\TextInput::make('nombre')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('descripción')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('precio')
+                    ->required(),
+                Forms\Components\Select::make('medida_id')
+                        ->required()->relationship('medida', 'nombre'),
+                Forms\Components\Select::make('proveedors_id')
+                        ->label('Proveedor')
+                        ->relationship('proveedors', 'nombre'),
+                Forms\Components\TextInput::make('stock')
+                    ->required(),
+                Forms\Components\Select::make('categoria_producto_id')
+                    ->required()->relationship('categoria_producto', 'nombre'),
+                Forms\Components\Toggle::make('promocion')
+                    ->required(),
             ]);
     }
 
@@ -30,23 +46,28 @@ class ProductosRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nombre'),
+                Tables\Columns\TextColumn::make('nombre')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('descripción'),
+                Tables\Columns\TextColumn::make('precio'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
-                Tables\Actions\AttachAction::make(),
+                // Tables\Actions\CreateAction::make(),
+                Tables\Actions\AttachAction::make()->label('Agregar'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DetachAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DetachBulkAction::make(),
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }    
+    }
+
+        public function hasCombinedRelationManagerTabsWithForm(): bool
+        {
+            return true;
+        }
 }
