@@ -19,4 +19,8 @@ class EditVenta extends EditRecord
             Actions\RestoreAction::make(),
         ];
     }
+    public function hasCombinedRelationManagerTabsWithForm(): bool
+{
+    return true;
+}
 }

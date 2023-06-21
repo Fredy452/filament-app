@@ -29,13 +29,16 @@ use Filament\Forms\Components\Select;
 // Section
 use Filament\Forms\Components\Section;
 
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Placeholder;
+
 class VentaResource extends Resource
 {
     protected static ?string $model = Venta::class;
     // blobal searchable
     protected static ?string $recordTitleAttribute = 'numero_factura';
 
-    protected static ?string $navigationIcon = 'heroicon-o-lightning-bolt';
+    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     public static function form(Form $form): Form
     {
@@ -54,29 +57,72 @@ class VentaResource extends Resource
                     Forms\Components\Select::make('metodo_pagos_id')
                         ->required()->relationship('metodo_pagos', 'nombre')->default(1),
                         Forms\Components\TextInput::make('numero_factura')
-                            ->required()
-                            ->disabled()
-                            ->default('OR-' . random_int(100000, 999999)),
-                        Forms\Components\DateTimePicker::make('fecha')
-                            ->required()->default(fn () => now())->disabled(),
+                        ->disabled()
+                        ->default('OR-' . random_int(100000, 999999)),
+                    Forms\Components\DateTimePicker::make('fecha')
+                        ->default(fn () => now())->disabled(),
                         Forms\Components\Select::make('estado_pagos_id')
                         ->relationship('estado_pagos', 'nombre')->default('pagado')->default(1)
                         ->label('Estado'),
-                        Forms\Components\TextInput::make('total_venta')
+                    Forms\Components\TextInput::make('total_venta')//Quiero guaradar en este la suma de todas las ventas
                         ->reactive(),
                 ])
                 ->columns(2),
+
+                Section::make('Productos')
+                ->description('Agregar productos')
+                ->collapsible()
+                ->schema([
+                    // products
+                    Repeater::make('productos')
+                            ->relationship()
+                            ->schema([
+                                Select::make('producto_id')
+                                    ->label('Producto')
+                                    ->options(Producto::all()->pluck('nombre', 'id'))
+                                    ->required()
+                                    ->searchable()
+                                    ->reactive()
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('precio', Producto::find($state)?->precio ?? 0))
+                                    ->columnSpan([
+                                        'md' => 5,
+                                    ]),
+
+                                Forms\Components\TextInput::make('cantidad')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn ($state, callable $set, callable $get) => $set('precio', $state * $get('precio')))
+                                    ->columnSpan([
+                                        'md' => 2,
+                                    ])
+                                    ->required(),
+                                Forms\Components\TextInput::make('precio')
+                                    ->label('Precio Unitario')
+                                    ->disabled()
+                                    ->numeric()
+                                    ->required()
+                                    ->columnSpan([
+                                        'md' => 3,
+                                    ]),
+                            ])
+                            ->orderable()
+                            ->defaultItems(1)
+                            ->disableLabel()
+                            ->columns([
+                                'md' => 10,
+                            ])
+                            ->required(),
+                ])
             ]);
-
     }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('numero_factura')->label('N°')->searchable(),
                 Tables\Columns\TextColumn::make('estado_pagos.nombre')->label('Estado'),
-                Tables\Columns\TextColumn::make('clientes.nombre'),
+                Tables\Columns\TextColumn::make('users.name'),
                 Tables\Columns\TextColumn::make('total_venta'),
             ])
             ->filters([

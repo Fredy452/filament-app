@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('venta_detalles', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('venta_id');
-            $table->unsignedBigInteger('producto_id');
+            $table->unsignedInteger('sort')->default(0);
+            $table->foreignId('venta_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('producto_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->integer('cantidad');
+            $table->decimal('precio', 10, 2);
             $table->timestamps();
-
-            $table->foreign('venta_id')->references('id')->on('ventas');
-            $table->foreign('producto_id')->references('id')->on('productos');
         });
     }
 

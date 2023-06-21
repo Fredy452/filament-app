@@ -10,6 +10,8 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Filament\Tables\Actions\AttachAction;
+
 class ProductosRelationManager extends RelationManager
 {
     protected static string $relationship = 'productos';
@@ -46,8 +48,8 @@ class ProductosRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nombre')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('descripción'),
+                Tables\Columns\TextColumn::make('producto_id')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('venta_id'),
                 Tables\Columns\TextColumn::make('precio'),
             ])
             ->filters([
@@ -55,7 +57,7 @@ class ProductosRelationManager extends RelationManager
             ])
             ->headerActions([
                 // Tables\Actions\CreateAction::make(),
-                Tables\Actions\AttachAction::make()->label('Agregar'),
+                // Tables\Actions\AttachAction::make()->label('Agregar'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
